@@ -1,1 +1,4 @@
-/target/
+# Default ignored files
+/.idea/
+/.target/
+
