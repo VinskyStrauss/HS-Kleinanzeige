@@ -81,6 +81,9 @@
     </build>
 
     <developers>
-
+     <developer>
+         <name>Vinsky Strauss TanHanSen</name>
+         <id>772529</id>
+     </developer>
     </developers>
 </project>
