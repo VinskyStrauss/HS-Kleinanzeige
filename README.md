@@ -10,3 +10,4 @@ docker run --name=mysql -p 4406:3306 -e MYSQL_ROOT_PASSWORD=start01 -e MYSQL_DAT
 # Teammitglieder:
 * Marcel Bernardo (1112162)
 * Vinsky Strauss TanHanSen (772529)
+* Bernhard Ricardo Putranto (772543)
