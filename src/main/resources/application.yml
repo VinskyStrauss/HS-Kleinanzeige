@@ -13,7 +13,7 @@ spring:
     password: start01
 
 # use the following properties to execute DDL on startup
- sql.init.mode: always                                                 #
+ sql.init.mode: always
   jpa
     hibernate
       ddl-auto: none
