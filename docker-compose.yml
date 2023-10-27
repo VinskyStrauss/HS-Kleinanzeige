@@ -1,0 +1,13 @@
+version: '3.1'
+
+services:
+  recipe_db:
+    container_name: mysql
+    image: mysql:8.0.22
+    restart: always
+    environment:
+      MYSQL_DATABASE: KLEINANZEIGEN
+      POSTGRES_USER: root
+      MYSQL_ROOT_PASSWORD: start01
+    ports:
+      - 4406:3306
