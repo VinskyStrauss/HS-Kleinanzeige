@@ -10,7 +10,6 @@
 
     <name>HS Kleinanzeigen</name>
     <description>Plattform zum Verwalten von Kleinanzeigen</description>
-    <!-- FIXME change it to the project's website -->
     <url>https://code.fbi.h-da.de/java-enterprise-dbae-ws-2023/bem/hs-kleinanzeigen-bem</url>
 
     <parent>
@@ -24,7 +23,6 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <mapstruct.version>1.5.5.Final</mapstruct.version>
-        <!-- FIXME add java version -->
         <java.version>17</java.version>
     </properties>
 
