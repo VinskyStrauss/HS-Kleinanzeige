@@ -5,10 +5,10 @@ selbst einzustellen.
 * JDK 17
 * Maven
 * Docker
-docker run --name=mysql -p 4406:3306 -e MYSQL_ROOT_PASSWORD=start01 -e MYSQL_DATABASE=KLEINANZEIGEN -d mysql:8.0.
+docker run --name=mysql -p 4406:3306 -e MYSQL_ROOT_PASSWORD=start01 -e MYSQL_DATABASE=KLEINANZEIGEN -d mysql:8.0.22
 
 # Teammitglieder:
 * Marcel Bernardo (1112162)
 * Vinsky Strauss TanHanSen (772529)
-* Bernhard Ricardo Putranto (772543)
 * Moses Antonio (1112599)
+* Vincentius Raynaldi (768491)
