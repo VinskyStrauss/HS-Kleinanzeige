@@ -7,7 +7,10 @@ services:
     restart: always
     environment:
       MYSQL_DATABASE: KLEINANZEIGEN
-      POSTGRES_USER: root
       MYSQL_ROOT_PASSWORD: start01
     ports:
       - 4406:3306
+    volumes:
+      - kleinanzeigen:/var/lib/mysql
+volumes:
+  kleinanzeigen:
