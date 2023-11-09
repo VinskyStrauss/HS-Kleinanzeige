@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.MediaType;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,6 +26,7 @@ class CategoryRequest {
     }
 }
 @RestController
+@Secured({"ROLE_ADMIN", "ROLE_USER"})
 public class CategoryController {
     private final CategoryRepository categoryRepository;
 
@@ -35,6 +37,7 @@ public class CategoryController {
 
     @PostMapping(path = "/api/categories", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE )
     @Transactional
+    @Secured({"ROLE_ADMIN", "ROLE_USER"})
     public int createAdvertisement(@RequestBody CategoryRequest category) {
         if(categoryRepository.findByName(category.getName()) != null)
             throw new DataIntegrityViolationException("Category already exists");
@@ -43,11 +46,13 @@ public class CategoryController {
     }
 
     @GetMapping(path = "/api/categories/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Secured({"ROLE_ADMIN", "ROLE_USER"})
     public Category getCategoryById(@PathVariable int id) {
         return categoryRepository.findById(id).orElseThrow(() -> new NullPointerException("Category not found"));
     }
 
     @GetMapping(path = "/api/categories", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Secured({"ROLE_ADMIN", "ROLE_USER"})
     public List<Category> getAllCategories() {
         return categoryRepository.findAll();
     }

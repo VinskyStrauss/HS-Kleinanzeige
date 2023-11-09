@@ -19,8 +19,8 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
-    naming:
-      physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
 
 
 # FIXME: use the following properties to enable actuator endpoints
@@ -28,5 +28,5 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,metrics
+        include: health,metrics,info
   

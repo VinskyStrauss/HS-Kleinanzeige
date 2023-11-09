@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -47,7 +48,7 @@ class AdvertisementPayload{
             throw new IllegalArgumentException("Invalid values for AdvertisementPayload");
         if (!type.equals("OFFER") && !type.equals("REQUEST"))
             throw new IllegalArgumentException("Invalid type for AdvertisementPayload (must be OFFER or REQUEST)");
-
+        System.out.println(categoryId);
         this.type = type.equals("OFFER") ? AdType.OFFER : AdType.REQUEST;
         this.category_id = categoryId;
         this.title = title;
@@ -71,6 +72,7 @@ class AdvertisementPayload{
 }
 
 @RestController
+@Secured({"ROLE_ADMIN", "ROLE_USER"})
 public class AdvertisementController {
     private final AdvertisementRepository advertisementRepository;
     private final CategoryRepository categoryRepository;
@@ -82,6 +84,7 @@ public class AdvertisementController {
     }
 
     @PostMapping(path = "/api/advertisements", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE )
+    @Secured({"ROLE_ADMIN", "ROLE_USER"})
     public ResponseEntity<Advertisement> createAdvertisement(@RequestBody AdvertisementPayload advertisement) {
         Category category = categoryRepository.findById(advertisement.getCategoryID()).orElseThrow(() -> new NullPointerException("Category not found"));
         advertisementRepository.saveAndFlush(new Advertisement(advertisement.getType(), category, advertisement.getTitle(), advertisement.getDescription(), advertisement.getPrice(), advertisement.getLocation()));
@@ -94,6 +97,7 @@ public class AdvertisementController {
     }
 
     @GetMapping(path = "/api/advertisements/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Secured({"ROLE_ADMIN", "ROLE_USER"})
     public ResponseEntity<Advertisement> getAdvertisementById(@PathVariable int id) {
         return advertisementRepository.findById(id)
                 .map(ResponseEntity::ok)
@@ -101,6 +105,7 @@ public class AdvertisementController {
     }
 
     @GetMapping(path = "/api/advertisements", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Secured({"ROLE_ADMIN", "ROLE_USER"})
     public List<Advertisement> getAllAdvertisements() {
         return advertisementRepository.findAll();
     }

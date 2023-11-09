@@ -40,6 +40,7 @@ public class Advertisement {
     @Column(name = "CREATED", nullable = false)
     private Date created;
 
+
     @PrePersist
     protected void onCreate() {
         created = new Date();
