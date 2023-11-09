@@ -8,7 +8,7 @@ spring:
 # FIXME: use the following credentials for your sql connection
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:4406/KLEINANZEIGEN?useSSL=false
+    url: jdbc:mysql://localhost:4406/KLEINANZEIGEN?allowPublicKeyRetrieval=true&useSSL=false
     username: root
     password: start01
 
@@ -18,7 +18,7 @@ spring:
       mode: always
   jpa:
     hibernate:
-      ddl-auto: none
+      ddl-auto: update
     naming:
       physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
 

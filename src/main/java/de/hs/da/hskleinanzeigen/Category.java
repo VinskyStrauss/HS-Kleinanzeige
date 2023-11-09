@@ -1,9 +1,20 @@
 package de.hs.da.hskleinanzeigen;
-import javax.persistence.*;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import jakarta.persistence.*;
+import java.util.List;
 
 @Entity
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Table(name = "CATEGORY")
 public class Category {
+    public int getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
     @Id
     @GeneratedValue
     @Column(name = "ID")
@@ -11,4 +22,16 @@ public class Category {
 
     @Column(name = "NAME", nullable = false)
     private String name;
+
+    @OneToMany(mappedBy = "category")
+    private List<Advertisement> advertisements;
+
+    public Category(String name) {
+        this.name = name;
+    }
+
+    public Category() {
+    }
+
+
 }

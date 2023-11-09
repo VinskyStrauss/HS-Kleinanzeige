@@ -1,5 +1,6 @@
 package de.hs.da.hskleinanzeigen;
-import javax.persistence.*;
+import com.fasterxml.jackson.annotation.*;
+import jakarta.persistence.*;
 import java.util.Date;
 
 enum AdType {
@@ -8,6 +9,7 @@ enum AdType {
 }
 @Entity
 @Table(name = "AD")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Advertisement {
     @Id
     @GeneratedValue
@@ -18,9 +20,9 @@ public class Advertisement {
     @Column(name = "TYPE", nullable = false)
     private AdType type;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "CATEGORY_ID", nullable = false)
-    private int category_id;
+    private Category category;
 
     @Column(name = "TITLE", nullable = false)
     private String title;
@@ -37,4 +39,50 @@ public class Advertisement {
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "CREATED", nullable = false)
     private Date created;
+
+    @PrePersist
+    protected void onCreate() {
+        created = new Date();
+    }
+
+    public Advertisement(AdType type, Category category, String title, String description, int price, String location) {
+        this.type = type;
+        this.category = category;
+        this.title = title;
+        this.description = description;
+        this.price = price;
+        this.location = location;
+    }
+
+    public Advertisement() {
+
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public AdType getType() {
+        return type;
+    }
+
+    public Category getCategory() {
+        return category;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public int getPrice() {
+        return price;
+    }
+
+    public String getLocation() {
+        return location;
+    }
 }
