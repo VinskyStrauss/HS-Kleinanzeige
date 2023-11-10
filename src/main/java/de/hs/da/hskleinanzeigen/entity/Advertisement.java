@@ -1,12 +1,8 @@
-package de.hs.da.hskleinanzeigen;
+package de.hs.da.hskleinanzeigen.entity;
 import com.fasterxml.jackson.annotation.*;
 import jakarta.persistence.*;
 import java.util.Date;
 
-enum AdType {
-    OFFER,
-    REQUEST
-}
 @Entity
 @Table(name = "AD")
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})

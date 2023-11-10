@@ -1,5 +1,8 @@
 package de.hs.da.hskleinanzeigen;
 
+import de.hs.da.hskleinanzeigen.exception.EntityIntegrityViolationException;
+import de.hs.da.hskleinanzeigen.exception.EntityNotFoundException;
+import de.hs.da.hskleinanzeigen.exception.IllegalEntityException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,22 +13,22 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 @ControllerAdvice
 
 public class ExceptionController {
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ExceptionHandler(EntityNotFoundException.class)
+    public ResponseEntity<String> handleEntityNotFoundException(EntityNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Not Found: " + ex.getMessage());
+    }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<String> handleIllegalArgumentException(IllegalArgumentException ex) {
+    @ExceptionHandler(IllegalEntityException.class)
+    public ResponseEntity<String> handelIllegalEntityException(IllegalEntityException ex) {
         return ResponseEntity.badRequest().body("Bad Request: " + ex.getMessage());
     }
 
     @ResponseStatus(HttpStatus.CONFLICT)
     @ExceptionHandler(DataIntegrityViolationException.class)
-    public ResponseEntity<String> handleDataIntegrityViolationException(DataIntegrityViolationException ex) {
+    public ResponseEntity<String> handleEntityIntegrityViolationException(EntityIntegrityViolationException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT).body("Conflict: " + ex.getMessage());
     }
 
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    @ExceptionHandler(NullPointerException.class)
-    public ResponseEntity<String> handleNullPointerException(NullPointerException ex) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Not Found: " + ex.getMessage());
-    }
 }

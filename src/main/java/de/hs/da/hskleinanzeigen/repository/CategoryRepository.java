@@ -1,6 +1,6 @@
-package de.hs.da.hskleinanzeigen;
+package de.hs.da.hskleinanzeigen.repository;
 
-import de.hs.da.hskleinanzeigen.Category;
+import de.hs.da.hskleinanzeigen.entity.Category;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

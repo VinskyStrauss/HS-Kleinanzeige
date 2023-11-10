@@ -1,11 +1,9 @@
 server:
   port: 8081
-# FIXME: adjust context-path to set base url of application
   servlet:
     context-path: /hs-kleinanzeigen
 
 spring:
-# FIXME: use the following credentials for your sql connection
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:4406/KLEINANZEIGEN?allowPublicKeyRetrieval=true&useSSL=false
@@ -22,8 +20,6 @@ spring:
       naming:
         physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
 
-
-# FIXME: use the following properties to enable actuator endpoints
 management:
   endpoints:
     web:

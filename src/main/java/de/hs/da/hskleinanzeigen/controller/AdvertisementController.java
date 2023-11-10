@@ -1,7 +1,14 @@
-package de.hs.da.hskleinanzeigen;
+package de.hs.da.hskleinanzeigen.controller;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import de.hs.da.hskleinanzeigen.exception.EntityNotFoundException;
+import de.hs.da.hskleinanzeigen.exception.IllegalEntityException;
+import de.hs.da.hskleinanzeigen.repository.AdvertisementRepository;
+import de.hs.da.hskleinanzeigen.entity.Category;
+import de.hs.da.hskleinanzeigen.repository.CategoryRepository;
+import de.hs.da.hskleinanzeigen.entity.AdType;
+import de.hs.da.hskleinanzeigen.entity.Advertisement;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
@@ -45,9 +52,9 @@ class AdvertisementPayload{
     @JsonCreator
     AdvertisementPayload(@JsonProperty("type") String type,@JsonProperty("categoryId") int categoryId,@JsonProperty("title") String title,@JsonProperty("description") String description,@JsonProperty("price") int price,@JsonProperty("location") String location) {
         if(!checkValueValid(type, categoryId, title, description, price, location))
-            throw new IllegalArgumentException("Invalid values for AdvertisementPayload");
+            throw new IllegalEntityException("AdvertisementPayload",title);
         if (!type.equals("OFFER") && !type.equals("REQUEST"))
-            throw new IllegalArgumentException("Invalid type for AdvertisementPayload (must be OFFER or REQUEST)");
+            throw new IllegalEntityException("AdvertisementPayload",title,"Invalid type for AdvertisementPayload (must be OFFER or REQUEST)");
         System.out.println(categoryId);
         this.type = type.equals("OFFER") ? AdType.OFFER : AdType.REQUEST;
         this.category_id = categoryId;
@@ -86,13 +93,13 @@ public class AdvertisementController {
     @PostMapping(path = "/api/advertisements", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE )
     @Secured({"ROLE_ADMIN", "ROLE_USER"})
     public ResponseEntity<Advertisement> createAdvertisement(@RequestBody AdvertisementPayload advertisement) {
-        Category category = categoryRepository.findById(advertisement.getCategoryID()).orElseThrow(() -> new NullPointerException("Category not found"));
-        advertisementRepository.saveAndFlush(new Advertisement(advertisement.getType(), category, advertisement.getTitle(), advertisement.getDescription(), advertisement.getPrice(), advertisement.getLocation()));
+        Category category = categoryRepository.findById(advertisement.getCategoryID()).orElseThrow(() -> new EntityNotFoundException("Category of Advertisement",advertisement.getCategoryID()));
+        advertisementRepository.save(new Advertisement(advertisement.getType(), category, advertisement.getTitle(), advertisement.getDescription(), advertisement.getPrice(), advertisement.getLocation()));
         Advertisement createdAd = advertisementRepository.findByTitle(advertisement.getTitle());
         if (createdAd != null) {
             return ResponseEntity.status(201).body(createdAd);
         } else {
-            throw new IllegalArgumentException("Bad Payload");
+            throw new IllegalEntityException("Advertisement",advertisement.getTitle());
         }
     }
 
@@ -101,7 +108,7 @@ public class AdvertisementController {
     public ResponseEntity<Advertisement> getAdvertisementById(@PathVariable int id) {
         return advertisementRepository.findById(id)
                 .map(ResponseEntity::ok)
-                .orElseThrow(() -> new NullPointerException("Advertisement not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Advertisement",id));
     }
 
     @GetMapping(path = "/api/advertisements", produces = MediaType.APPLICATION_JSON_VALUE)

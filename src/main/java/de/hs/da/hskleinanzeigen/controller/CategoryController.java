@@ -1,7 +1,12 @@
-package de.hs.da.hskleinanzeigen;
+package de.hs.da.hskleinanzeigen.controller;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import de.hs.da.hskleinanzeigen.exception.EntityIntegrityViolationException;
+import de.hs.da.hskleinanzeigen.exception.EntityNotFoundException;
+import de.hs.da.hskleinanzeigen.exception.IllegalEntityException;
+import de.hs.da.hskleinanzeigen.repository.CategoryRepository;
+import de.hs.da.hskleinanzeigen.entity.Category;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.MediaType;
@@ -17,7 +22,7 @@ class CategoryRequest {
     @JsonCreator
     public CategoryRequest(@JsonProperty("name") String name) {
         if(name == null || name.isEmpty())
-            throw new IllegalArgumentException("Invalid name for Category");
+            throw new IllegalEntityException("CategoryPayload","?","Name must not be empty");
         this.name = name;
     }
 
@@ -40,15 +45,15 @@ public class CategoryController {
     @Secured({"ROLE_ADMIN", "ROLE_USER"})
     public int createAdvertisement(@RequestBody CategoryRequest category) {
         if(categoryRepository.findByName(category.getName()) != null)
-            throw new DataIntegrityViolationException("Category already exists");
-        categoryRepository.saveAndFlush(new Category(category.getName()));
+            throw new EntityIntegrityViolationException("Category",category.getName());
+        categoryRepository.save(new Category(category.getName()));
         return categoryRepository.findByName(category.getName()).getId();
     }
 
     @GetMapping(path = "/api/categories/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Secured({"ROLE_ADMIN", "ROLE_USER"})
     public Category getCategoryById(@PathVariable int id) {
-        return categoryRepository.findById(id).orElseThrow(() -> new NullPointerException("Category not found"));
+        return categoryRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Category",id));
     }
 
     @GetMapping(path = "/api/categories", produces = MediaType.APPLICATION_JSON_VALUE)
