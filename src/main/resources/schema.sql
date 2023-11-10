@@ -1,5 +1,4 @@
--- Use database KLEINANZEIGEN
-USE KLEINANZEIGEN;
+
 
 -- Drop the tables if they exist to start fresh
 DROP TABLE IF EXISTS AD;
