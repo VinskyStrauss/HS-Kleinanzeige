@@ -26,7 +26,7 @@ public class ExceptionController {
     }
 
     @ResponseStatus(HttpStatus.CONFLICT)
-    @ExceptionHandler(DataIntegrityViolationException.class)
+    @ExceptionHandler(EntityIntegrityViolationException.class)
     public ResponseEntity<String> handleEntityIntegrityViolationException(EntityIntegrityViolationException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT).body("Conflict: " + ex.getMessage());
     }

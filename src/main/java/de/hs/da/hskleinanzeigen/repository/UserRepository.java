@@ -1,12 +1,11 @@
 package de.hs.da.hskleinanzeigen.repository;
-
-import de.hs.da.hskleinanzeigen.entity.Category;
+import de.hs.da.hskleinanzeigen.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
 @Repository
-public interface CategoryRepository extends JpaRepository<Category,Integer> {
-    Optional<Category> findByName(String name);
+public interface UserRepository extends JpaRepository<User,Integer> {
+    Optional<User> findByEmail(String name);
 }

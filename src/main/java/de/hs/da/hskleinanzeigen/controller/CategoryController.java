@@ -10,10 +10,12 @@ import de.hs.da.hskleinanzeigen.entity.Category;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URI;
 import java.util.List;
 
 class CategoryRequest {
@@ -41,13 +43,14 @@ public class CategoryController {
     }
 
     @PostMapping(path = "/api/categories", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE )
-    @Transactional
     @Secured({"ROLE_ADMIN", "ROLE_USER"})
-    public int createAdvertisement(@RequestBody CategoryRequest category) {
-        if(categoryRepository.findByName(category.getName()) != null)
+    public ResponseEntity<Category> createAdvertisement(@RequestBody CategoryRequest category) {
+        if(categoryRepository.findByName(category.getName()).isPresent())
             throw new EntityIntegrityViolationException("Category",category.getName());
         categoryRepository.save(new Category(category.getName()));
-        return categoryRepository.findByName(category.getName()).getId();
+        return categoryRepository.findByName(category.getName())
+                .map(newCategory -> ResponseEntity.created(URI.create("/api/categories")).body(newCategory))
+                .orElseThrow(() -> new EntityNotFoundException("Category",category.getName()));
     }
 
     @GetMapping(path = "/api/categories/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
