@@ -1,11 +1,9 @@
 package de.hs.da.hskleinanzeigen.entity;
-import com.fasterxml.jackson.annotation.*;
 import jakarta.persistence.*;
 import java.util.Date;
 
 @Entity
 @Table(name = "AD")
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Advertisement {
     @Id
     @GeneratedValue
@@ -16,9 +14,13 @@ public class Advertisement {
     @Column(name = "TYPE", nullable = false)
     private AdType type;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "CATEGORY_ID", nullable = false)
     private Category category;
+
+    @ManyToOne
+    @JoinColumn(name = "USER_ID", nullable = false)
+    private User user;
 
     @Column(name = "TITLE", nullable = false)
     private String title;
@@ -36,15 +38,15 @@ public class Advertisement {
     @Column(name = "CREATED", nullable = false)
     private Date created;
 
-
     @PrePersist
     protected void onCreate() {
         created = new Date();
     }
 
-    public Advertisement(AdType type, Category category, String title, String description, int price, String location) {
+    public Advertisement(AdType type, Category category, User user, String title, String description, int price, String location) {
         this.type = type;
         this.category = category;
+        this.user = user;
         this.title = title;
         this.description = description;
         this.price = price;
@@ -67,6 +69,8 @@ public class Advertisement {
         return category;
     }
 
+    public User getUser() {return user;}
+
     public String getTitle() {
         return title;
     }
@@ -82,4 +86,6 @@ public class Advertisement {
     public String getLocation() {
         return location;
     }
+
+
 }

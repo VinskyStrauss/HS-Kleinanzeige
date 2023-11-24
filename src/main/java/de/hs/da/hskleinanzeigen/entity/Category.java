@@ -1,6 +1,5 @@
 package de.hs.da.hskleinanzeigen.entity;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import de.hs.da.hskleinanzeigen.entity.Advertisement;
 import jakarta.persistence.*;
 import java.util.List;
 
