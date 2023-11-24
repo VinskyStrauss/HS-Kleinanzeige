@@ -1,10 +1,8 @@
 package de.hs.da.hskleinanzeigen.controller;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import de.hs.da.hskleinanzeigen.dto.AdvertisementPayload;
 import de.hs.da.hskleinanzeigen.entity.User;
 import de.hs.da.hskleinanzeigen.exception.EntityNotFoundException;
-import de.hs.da.hskleinanzeigen.exception.IllegalEntityException;
 import de.hs.da.hskleinanzeigen.repository.AdvertisementRepository;
 import de.hs.da.hskleinanzeigen.entity.Category;
 import de.hs.da.hskleinanzeigen.repository.CategoryRepository;
@@ -20,72 +18,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.net.URI;
-import java.util.List;
-
-class AdvertisementPayload{
-    private AdType type;
-    private int category_id;
-    private int user_id;
-    private String title;
-    private String description;
-    private int price;
-    private String location;
-
-    public AdType getType() {
-        return type;
-    }
-
-    public int getCategoryID() {
-        return category_id;
-    }
-
-    public int getUserID() {return user_id;}
-
-    public String getTitle() {
-        return title;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public int getPrice() {
-        return price;
-    }
-
-    public String getLocation() {
-        return location;
-    }
-
-    @JsonCreator
-    AdvertisementPayload(@JsonProperty("type") String type,@JsonProperty("categoryId") int categoryId,@JsonProperty("userId") int userId,@JsonProperty("title") String title,@JsonProperty("description") String description,@JsonProperty("price") int price,@JsonProperty("location") String location) {
-        if(!checkValueValid(type, categoryId, userId, title, description, price, location))
-            throw new IllegalEntityException("AdvertisementPayload",title);
-        if (!type.equals("OFFER") && !type.equals("REQUEST"))
-            throw new IllegalEntityException("AdvertisementPayload",title,"Invalid type for AdvertisementPayload (must be OFFER or REQUEST)");
-        this.type = type.equals("OFFER") ? AdType.OFFER : AdType.REQUEST;
-        this.category_id = categoryId;
-        this.user_id = userId;
-        this.title = title;
-        this.description = description;
-        this.price = price;
-        this.location = location;
-    }
-
-    private boolean checkValueValid(String type, int categoryId, int userId, String title, String description, int price, String location) {
-        return checkValueValid(type) && checkValueValid(categoryId)
-                && checkValueValid(userId) && checkValueValid(title)
-                && checkValueValid(description) && checkValueValid(price)
-                && checkValueValid(location);
-    }
-    private boolean checkValueValid(String value) {
-        return value != null && !value.isEmpty();
-    }
-
-    private boolean checkValueValid(int value) {
-        return value > 0;
-    }
-}
 
 @RestController
 @Secured({"ROLE_ADMIN", "ROLE_USER"})
@@ -116,7 +48,7 @@ public class AdvertisementController {
     @GetMapping(path = "/api/advertisements/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Secured({"ROLE_ADMIN", "ROLE_USER"})
     public ResponseEntity<Advertisement> getAdvertisementById(@PathVariable int id) {
-        System.out.println("id: " + id + " " + advertisementRepository.findById(id));
+
         return advertisementRepository.findById(id)
                 .map(ResponseEntity::ok)
                 .orElseThrow(() -> new EntityNotFoundException("Advertisement",id));
@@ -126,7 +58,7 @@ public class AdvertisementController {
     @Secured({"ROLE_ADMIN", "ROLE_USER"})
     public Page<Advertisement> getAllAdvertisements(
             @RequestParam(name = "type", required = false) AdType type,
-            @RequestParam(name = "category", required = false) Integer categoryId,
+            @RequestParam(name = "categoryId", required = false) Integer categoryId,
             @RequestParam(name = "priceFrom", required = false, defaultValue = "0") Integer priceFrom,
             @RequestParam(name = "priceTo", required = false, defaultValue = "2147483647") Integer priceTo,
             @RequestParam(name = "page") int page,

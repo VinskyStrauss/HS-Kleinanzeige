@@ -1,5 +1,4 @@
 package de.hs.da.hskleinanzeigen.entity;
-import com.fasterxml.jackson.annotation.*;
 import jakarta.persistence.*;
 import java.util.Date;
 
@@ -15,11 +14,11 @@ public class Advertisement {
     @Column(name = "TYPE", nullable = false)
     private AdType type;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne
     @JoinColumn(name = "CATEGORY_ID", nullable = false)
     private Category category;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne
     @JoinColumn(name = "USER_ID", nullable = false)
     private User user;
 
