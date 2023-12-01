@@ -1,20 +1,20 @@
 package de.hs.da.hskleinanzeigen.entity;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.util.List;
 
 @Entity
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Table(name = "CATEGORY")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class Category {
-    public int getId() {
-        return id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
     @Id
     @GeneratedValue
     @Column(name = "ID")
@@ -24,14 +24,8 @@ public class Category {
     private String name;
 
     @OneToMany(mappedBy = "category")
+    @JsonManagedReference
     private List<Advertisement> advertisements;
-
-    public Category(String name) {
-        this.name = name;
-    }
-
-    public Category() {
-    }
 
 
 }

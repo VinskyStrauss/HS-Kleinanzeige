@@ -1,0 +1,145 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+    <changeSet author="moses (generated)" id="1701454413150-1">
+        <createTable tableName="AD">
+            <column autoIncrement="true" name="ID" type="INT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="TYPE" type="ENUM('OFFER', 'REQUEST')">
+                <constraints nullable="false"/>
+            </column>
+            <column name="USER_ID" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="CATEGORY_ID" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="TITLE" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="DESCRIPTION" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="PRICE" type="INT"/>
+            <column name="LOCATION" type="VARCHAR(255)"/>
+            <column name="CREATED" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="moses (generated)" id="1701454413150-2">
+        <createTable tableName="AD_SEQ">
+            <column name="next_val" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="moses (generated)" id="1701454413150-3">
+        <createTable tableName="CATEGORY">
+            <column autoIncrement="true" name="ID" type="INT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="NAME" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="moses (generated)" id="1701454413150-4">
+        <createTable tableName="CATEGORY_SEQ">
+            <column name="next_val" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="moses (generated)" id="1701454413150-5">
+        <createTable tableName="NOTEPAD">
+            <column autoIncrement="true" name="ID" type="INT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="USER_ID" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="AD_ID" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="NOTE" type="VARCHAR(255)"/>
+            <column name="CREATED" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="moses (generated)" id="1701454413150-6">
+        <createTable tableName="NOTEPAD_SEQ">
+            <column name="next_val" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="moses (generated)" id="1701454413150-7">
+        <createTable tableName="USER">
+            <column autoIncrement="true" name="ID" type="INT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="EMAIL" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="PASSWORD" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="FIRST_NAME" type="VARCHAR(255)"/>
+            <column name="LAST_NAME" type="VARCHAR(255)"/>
+            <column name="PHONE" type="VARCHAR(255)"/>
+            <column name="LOCATION" type="VARCHAR(255)"/>
+            <column name="CREATED" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="moses (generated)" id="1701454413150-8">
+        <createTable tableName="USER_SEQ">
+            <column name="next_val" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="moses (generated)" id="1701454413150-9">
+        <createIndex indexName="AD_ID" tableName="NOTEPAD">
+            <column name="AD_ID"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="moses (generated)" id="1701454413150-10">
+        <createIndex indexName="CATEGORY_ID" tableName="AD">
+            <column name="CATEGORY_ID"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="moses (generated)" id="1701454413150-11">
+        <createIndex indexName="USER_ID" tableName="AD">
+            <column name="USER_ID"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="moses (generated)" id="1701454413150-12">
+        <createIndex indexName="USER_ID" tableName="NOTEPAD">
+            <column name="USER_ID"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="moses (generated)" id="1701454413150-13">
+        <addForeignKeyConstraint baseColumnNames="CATEGORY_ID" baseTableName="AD" constraintName="AD_ibfk_1" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="ID" referencedTableName="CATEGORY" validate="true"/>
+    </changeSet>
+    <changeSet author="moses (generated)" id="1701454413150-14">
+        <addForeignKeyConstraint baseColumnNames="USER_ID" baseTableName="AD" constraintName="AD_ibfk_2" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="ID" referencedTableName="USER" validate="true"/>
+    </changeSet>
+    <changeSet author="moses (generated)" id="1701454413150-15">
+        <addForeignKeyConstraint baseColumnNames="USER_ID" baseTableName="NOTEPAD" constraintName="NOTEPAD_ibfk_1" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="ID" referencedTableName="USER" validate="true"/>
+    </changeSet>
+    <changeSet author="moses (generated)" id="1701454413150-16">
+        <addForeignKeyConstraint baseColumnNames="AD_ID" baseTableName="NOTEPAD" constraintName="NOTEPAD_ibfk_2" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="ID" referencedTableName="AD" validate="true"/>
+    </changeSet>
+    <changeSet id="init-user-seq" author="yourName">
+        <insert tableName="USER_SEQ">
+            <column name="next_val" valueNumeric="1"/>
+        </insert>
+    </changeSet>
+    <changeSet id="init-notepad-seq" author="moses">
+        <insert tableName="NOTEPAD_SEQ">
+            <column name="next_val" valueNumeric="1"/>
+        </insert>
+        <insert tableName="CATEGORY_SEQ">
+            <column name="next_val" valueNumeric="1"/>
+        </insert>
+        <insert tableName="AD_SEQ">
+            <column name="next_val" valueNumeric="1"/>
+        </insert>
+    </changeSet>
+</databaseChangeLog>
