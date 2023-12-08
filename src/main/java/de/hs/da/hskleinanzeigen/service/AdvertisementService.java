@@ -1,10 +1,7 @@
 package de.hs.da.hskleinanzeigen.service;
 
-import de.hs.da.hskleinanzeigen.dto.request.RequestAdvertisementDTO;
-import de.hs.da.hskleinanzeigen.dto.response.ResponseAdvertisementDTO;
 import de.hs.da.hskleinanzeigen.entity.User;
 import de.hs.da.hskleinanzeigen.exception.EntityNotFoundException;
-import de.hs.da.hskleinanzeigen.exception.IllegalEntityException;
 import de.hs.da.hskleinanzeigen.mapper.AdvertisementMapper;
 import de.hs.da.hskleinanzeigen.repository.AdvertisementRepository;
 import de.hs.da.hskleinanzeigen.entity.Category;
@@ -14,12 +11,12 @@ import de.hs.da.hskleinanzeigen.entity.Advertisement;
 import de.hs.da.hskleinanzeigen.repository.UserRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.net.URI;
+import java.util.Optional;
 
 @RestController
 @Secured({"ROLE_ADMIN", "ROLE_USER"})
@@ -28,61 +25,32 @@ public class AdvertisementService {
     private final CategoryRepository categoryRepository;
     private final UserRepository userRepository;
 
-    private final AdvertisementMapper advertisementMapper;
 
     @Autowired
     public AdvertisementService(AdvertisementRepository advertisementRepository, CategoryRepository categoryRepository, UserRepository userRepository, AdvertisementMapper advertisementMapper) {
         this.advertisementRepository = advertisementRepository;
         this.categoryRepository = categoryRepository;
         this.userRepository = userRepository;
-        this.advertisementMapper = advertisementMapper;
     }
 
-    public ResponseEntity<ResponseAdvertisementDTO> createAdvertisement(RequestAdvertisementDTO advertisement) {
-        if (!checkValueValid(advertisement))
-            throw new IllegalEntityException("AdvertisementPayload", advertisement.getTitle());
+    public Optional<Advertisement> createAdvertisement(Advertisement advertisement, int userId, int categoryId) {
+        Category category = categoryRepository.findById(categoryId).orElseThrow(() -> new EntityNotFoundException("Category of Advertisement",categoryId));
+        User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("User of Advertisement",userId));
 
-        Category category = categoryRepository.findById(advertisement.getCategoryId()).orElseThrow(() -> new EntityNotFoundException("Category of Advertisement",advertisement.getCategoryId()));
-        User user = userRepository.findById(advertisement.getUserId()).orElseThrow(() -> new EntityNotFoundException("User of Advertisement",advertisement.getUserId()));
+        advertisement.setCategory(category);
+        advertisement.setUser(user);
 
-        Advertisement createdAdvertisement = advertisementMapper.toEntity(advertisement);
-        createdAdvertisement.setCategory(category);
-        createdAdvertisement.setUser(user);
-
-        advertisementRepository.save(createdAdvertisement);
-        return advertisementRepository.findByTitle(advertisement.getTitle())
-                .map(newAdvertisement -> ResponseEntity.created(URI.create("/api/advertisements")).body(advertisementMapper.toResDTO(newAdvertisement)))
-                .orElseThrow(() -> new EntityNotFoundException("Advertisement",advertisement.getTitle()));
+        advertisementRepository.save(advertisement);
+        return advertisementRepository.findByTitle(advertisement.getTitle());
     }
 
-    private boolean checkValueValid(RequestAdvertisementDTO advertisement) {
-        return checkValueValid(advertisement.getType()) && checkValueValid(advertisement.getCategoryId())
-                && checkValueValid(advertisement.getUserId()) && checkValueValid(advertisement.getTitle())
-                && checkValueValid(advertisement.getDescription()) && checkValueValid(advertisement.getPrice())
-                && checkValueValid(advertisement.getLocation());
+    public Optional<Advertisement> getAdvertisementById(int id) {
+
+        return advertisementRepository.findById(id);
+
     }
 
-    private boolean checkValueValid(String value) {
-        return value != null && !value.isEmpty();
-    }
-
-    private boolean checkValueValid(int value) {
-        return value > 0;
-    }
-
-    private boolean checkValueValid(AdType type) {
-        return type == AdType.OFFER || type == AdType.REQUEST;
-    }
-
-
-    public ResponseEntity<ResponseAdvertisementDTO> getAdvertisementById(int id) {
-
-        return advertisementRepository.findById(id)
-                .map(advertisement -> ResponseEntity.ok().body(advertisementMapper.toResDTO(advertisement)))
-                .orElseThrow(() -> new EntityNotFoundException("Advertisement",id));
-    }
-
-    public Page<ResponseAdvertisementDTO> getAllAdvertisements(
+    public Page<Advertisement> getAllAdvertisements(
             AdType type,
             Integer categoryId,
             Integer priceFrom,
@@ -91,7 +59,6 @@ public class AdvertisementService {
             int size
     ) {
         PageRequest pageRequest = PageRequest.of(page, size);
-        return advertisementRepository.findByQuery(type, categoryId, priceFrom, priceTo, pageRequest)
-                .map(advertisementMapper::toResDTO);
+        return advertisementRepository.findByQuery(type, categoryId, priceFrom, priceTo, pageRequest);
     }
 }

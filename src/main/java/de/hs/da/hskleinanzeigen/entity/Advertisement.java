@@ -1,6 +1,4 @@
 package de.hs.da.hskleinanzeigen.entity;
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -26,16 +24,13 @@ public class Advertisement {
 
     @ManyToOne
     @JoinColumn(name = "CATEGORY_ID", nullable = false)
-    @JsonBackReference
     private Category category;
 
     @ManyToOne
     @JoinColumn(name = "USER_ID", nullable = false)
-    @JsonBackReference
     private User user;
 
     @OneToMany(mappedBy = "advertisement")
-    @JsonManagedReference
     private List<Notepad> notepads;
 
     @Column(name = "TITLE", nullable = false)

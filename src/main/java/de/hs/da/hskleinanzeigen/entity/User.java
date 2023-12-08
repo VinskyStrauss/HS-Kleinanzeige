@@ -1,6 +1,5 @@
 package de.hs.da.hskleinanzeigen.entity;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -43,11 +42,9 @@ public class User {
     private Date created;
 
     @OneToMany(mappedBy = "user")
-    @JsonManagedReference
     private List<Advertisement> advertisement;
 
     @OneToMany(mappedBy = "user")
-    @JsonManagedReference
     private List<Notepad> notepads;
 
     @PrePersist

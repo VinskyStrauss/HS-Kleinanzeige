@@ -2,6 +2,8 @@ package de.hs.da.hskleinanzeigen.controller;
 
 import de.hs.da.hskleinanzeigen.dto.request.RequestNotepadDTO;
 import de.hs.da.hskleinanzeigen.dto.response.ResponseNotepadDTO;
+import de.hs.da.hskleinanzeigen.exception.EntityNotFoundException;
+import de.hs.da.hskleinanzeigen.mapper.NotepadMapper;
 import de.hs.da.hskleinanzeigen.service.NotepadService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -15,8 +17,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @Secured({"ROLE_ADMIN", "ROLE_USER"})
@@ -24,9 +29,12 @@ import java.util.Map;
 public class NotepadController {
     private final NotepadService notepadService;
 
+    private final NotepadMapper notepadMapper;
+
     @Autowired
-    public NotepadController(NotepadService notepadService) {
+    public NotepadController(NotepadService notepadService, NotepadMapper notepadMapper) {
         this.notepadService = notepadService;
+        this.notepadMapper = notepadMapper;
     }
 
     @PutMapping(path = "/api/users/{userId}/notepad", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE )
@@ -35,7 +43,10 @@ public class NotepadController {
             @ApiResponse(responseCode = "200", description = "Notepad entry created"),
             @ApiResponse(responseCode = "400", description = "Invalid input")})
     public ResponseEntity<Map<String, Integer>> createNotepad(@Parameter(description = "Notepad details to create a new notepad") @PathVariable("userId") int userId, @RequestBody RequestNotepadDTO notepad) {
-        return notepadService.createNotepad(userId, notepad);
+        notepad.setUserId(userId);
+        return notepadService.createNotepad(userId, notepad.getAdvertisementId(), notepadMapper.toEntity(notepad))
+                .map(newNotepad -> ResponseEntity.ok().body(Collections.singletonMap("id", newNotepad.getId())))
+                .orElseThrow(() -> new EntityNotFoundException("Notepad", userId + "/" + notepad.getAdvertisementId()));
     }
 
     @GetMapping(path = "/api/users/{userId}/notepad", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -47,7 +58,13 @@ public class NotepadController {
             @ApiResponse(responseCode = "404", description = "User not found"),
     })
     public ResponseEntity<List<ResponseNotepadDTO>> getNotepadByUserId(@Parameter(description = "To get notepad by user id") @PathVariable int userId) {
-        return notepadService.getNotepadByUserId(userId);
+        List<ResponseNotepadDTO> notepads = notepadService.getNotepadByUserId(userId)
+                .stream()
+                .flatMap(Collection::stream)
+                .map(notepadMapper::toResNotepadDTO)
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(notepads);
     }
 
     @DeleteMapping(path = "/api/users/{userId}/notepad", produces = MediaType.APPLICATION_JSON_VALUE)

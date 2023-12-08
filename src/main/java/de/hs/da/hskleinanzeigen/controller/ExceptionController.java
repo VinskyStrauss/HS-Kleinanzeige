@@ -1,4 +1,4 @@
-package de.hs.da.hskleinanzeigen;
+package de.hs.da.hskleinanzeigen.controller;
 
 import de.hs.da.hskleinanzeigen.exception.EntityIntegrityViolationException;
 import de.hs.da.hskleinanzeigen.exception.EntityNotFoundException;

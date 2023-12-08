@@ -1,5 +1,4 @@
 package de.hs.da.hskleinanzeigen.entity;
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -20,12 +19,10 @@ public class Notepad {
 
     @ManyToOne
     @JoinColumn(name = "USER_ID", nullable = false)
-    @JsonBackReference
     private User user;
 
     @ManyToOne
     @JoinColumn(name = "AD_ID", nullable = false)
-    @JsonBackReference
     private Advertisement advertisement;
 
     @Column(name = "NOTE")
