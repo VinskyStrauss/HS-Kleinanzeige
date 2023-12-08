@@ -11,5 +11,6 @@ public interface NotepadMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "created", ignore = true)
     Notepad toEntity(RequestNotepadDTO notepadDTO);
+
     ResponseNotepadDTO toResNotepadDTO(Notepad notepad);
 }

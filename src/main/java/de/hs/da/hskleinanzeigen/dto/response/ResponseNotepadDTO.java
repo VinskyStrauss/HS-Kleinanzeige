@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Data
 public class ResponseNotepadDTO {
     private int id;
-    private ResponseUserDTO user;
+//    private ResponseUserDTO user;
     private ResponseAdvertisementDTO advertisement;
     private String note;
 }

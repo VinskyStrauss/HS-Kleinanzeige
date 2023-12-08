@@ -62,6 +62,7 @@ public class NotepadService {
     public ResponseEntity<List<ResponseNotepadDTO>> getNotepadByUserId(int userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("User of Notepad",userId));
 
+
         List<ResponseNotepadDTO> notepads = notepadRepository.findByUser(user)
                 .stream()
                 .flatMap(Collection::stream)
