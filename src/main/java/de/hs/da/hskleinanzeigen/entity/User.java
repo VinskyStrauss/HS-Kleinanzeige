@@ -1,12 +1,18 @@
 package de.hs.da.hskleinanzeigen.entity;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.Date;
 import java.util.List;
 
 @Entity
 @Table(name = "USER")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class User {
     @Id
     @GeneratedValue
@@ -18,6 +24,7 @@ public class User {
 
     @Column(name = "PASSWORD", nullable = false)
     private String password;
+
     @Column(name = "FIRST_NAME")
     private String firstName;
 
@@ -37,45 +44,11 @@ public class User {
     @OneToMany(mappedBy = "user")
     private List<Advertisement> advertisement;
 
+    @OneToMany(mappedBy = "user")
+    private List<Notepad> notepads;
+
     @PrePersist
     protected void onCreate() {
         created = new Date();
-    }
-
-    public User(String email, String password, String firstname, String lastname,String phone_number, String location) {
-        this.email = email;
-        this.password = password;
-        this.firstName = firstname;
-        this.lastName = lastname;
-        this.location = location;
-        this.phone = phone_number;
-    }
-
-    public User() {
-
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public String getPhone() {
-        return phone;
-    }
-
-    public String getLocation() {
-        return location;
     }
 }

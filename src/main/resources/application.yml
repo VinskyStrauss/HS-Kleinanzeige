@@ -10,13 +10,18 @@ spring:
     username: root
     password: start01
 
+
 # use the following properties to execute DDL on startup
   sql:
     init:
-      mode: always
+      mode: never
+  liquibase:
+    enabled: true
+    change-log: classpath:/liquibase/db.changelog.xml
+
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: none
       naming:
         physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
 
@@ -25,4 +30,4 @@ management:
     web:
       exposure:
         include: health,metrics,info
-  
+

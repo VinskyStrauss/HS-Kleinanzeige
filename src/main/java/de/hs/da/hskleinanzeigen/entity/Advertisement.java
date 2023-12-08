@@ -1,9 +1,17 @@
 package de.hs.da.hskleinanzeigen.entity;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.util.Date;
+import java.util.List;
 
 @Entity
 @Table(name = "AD")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class Advertisement {
     @Id
     @GeneratedValue
@@ -21,6 +29,9 @@ public class Advertisement {
     @ManyToOne
     @JoinColumn(name = "USER_ID", nullable = false)
     private User user;
+
+    @OneToMany(mappedBy = "advertisement")
+    private List<Notepad> notepads;
 
     @Column(name = "TITLE", nullable = false)
     private String title;
@@ -42,50 +53,4 @@ public class Advertisement {
     protected void onCreate() {
         created = new Date();
     }
-
-    public Advertisement(AdType type, Category category, User user, String title, String description, int price, String location) {
-        this.type = type;
-        this.category = category;
-        this.user = user;
-        this.title = title;
-        this.description = description;
-        this.price = price;
-        this.location = location;
-    }
-
-    public Advertisement() {
-
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public AdType getType() {
-        return type;
-    }
-
-    public Category getCategory() {
-        return category;
-    }
-
-    public User getUser() {return user;}
-
-    public String getTitle() {
-        return title;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public int getPrice() {
-        return price;
-    }
-
-    public String getLocation() {
-        return location;
-    }
-
-
 }

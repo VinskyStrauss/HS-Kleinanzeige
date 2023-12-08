@@ -1,8 +1,9 @@
-package de.hs.da.hskleinanzeigen;
+package de.hs.da.hskleinanzeigen.controller;
 
 import de.hs.da.hskleinanzeigen.exception.EntityIntegrityViolationException;
 import de.hs.da.hskleinanzeigen.exception.EntityNotFoundException;
 import de.hs.da.hskleinanzeigen.exception.IllegalEntityException;
+import de.hs.da.hskleinanzeigen.exception.NoEntityContentFoundException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,6 +30,12 @@ public class ExceptionController {
     @ExceptionHandler(EntityIntegrityViolationException.class)
     public ResponseEntity<String> handleEntityIntegrityViolationException(EntityIntegrityViolationException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT).body("Conflict: " + ex.getMessage());
+    }
+
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @ExceptionHandler(NoEntityContentFoundException.class)
+    public ResponseEntity<String> handleNoEntityContentFoundException(NoEntityContentFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body("No Content: " + ex.getMessage());
     }
 
 }
