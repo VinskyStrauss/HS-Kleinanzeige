@@ -40,33 +40,33 @@ public class AdvertisementController {
     @Operation(summary = "Create a new advertisement")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Advertisement created"),
-            @ApiResponse(responseCode = "400", description = "Invalid input"),
-            @ApiResponse(responseCode = "409", description = "Advertisement already exists")})
+            @ApiResponse(responseCode = "400", description = "Incomplete payload"),
+            @ApiResponse(responseCode = "404", description = "User or Category not found")})
     public ResponseEntity<ResponseAdvertisementDTO> createAdvertisement(@Parameter(description = "Advertisement details to create a new advertisement") @RequestBody RequestAdvertisementDTO advertisement) {
         if (!checkValueValid(advertisement))
-            throw new IllegalEntityException("AdvertisementPayload", advertisement.getTitle());;
+            throw new IllegalEntityException("AdvertisementPayload", advertisement.getTitle());
 
         return  advertisementService.createAdvertisement(advertisementMapper.toEntity(advertisement), advertisement.getUserId(), advertisement.getCategoryId())
                 .map(newAdvertisement -> ResponseEntity.created(URI.create("/api/advertisements")).body(advertisementMapper.toResDTO(newAdvertisement)))
                 .orElseThrow(() -> new EntityNotFoundException("Advertisement",advertisement.getTitle()));
     }
 
-    private boolean checkValueValid(RequestAdvertisementDTO advertisement) {
+    public boolean checkValueValid(RequestAdvertisementDTO advertisement) {
         return checkValueValid(advertisement.getType()) && checkValueValid(advertisement.getCategoryId())
                 && checkValueValid(advertisement.getUserId()) && checkValueValid(advertisement.getTitle())
                 && checkValueValid(advertisement.getDescription()) && checkValueValid(advertisement.getPrice())
                 && checkValueValid(advertisement.getLocation());
     }
 
-    private boolean checkValueValid(String value) {
+    public boolean checkValueValid(String value) {
         return value != null && !value.isEmpty();
     }
 
-    private boolean checkValueValid(int value) {
+    public boolean checkValueValid(int value) {
         return value > 0;
     }
 
-    private boolean checkValueValid(AdType type) {
+    public boolean checkValueValid(AdType type) {
         return type == AdType.OFFER || type == AdType.REQUEST;
     }
 

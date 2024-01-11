@@ -47,23 +47,23 @@ public class UserController {
                 .orElseThrow(() -> new EntityNotFoundException("User",user.getEmail()));
     }
 
-    private boolean checkValueValid(RequestUserDTO requestUserDTO) {
+    public boolean checkValueValid(RequestUserDTO requestUserDTO) {
         return checkEmailValid(requestUserDTO.getEmail()) && checkPasswordValid(requestUserDTO.getPassword())
                 && checkNameValid(requestUserDTO.getFirstName()) && checkNameValid(requestUserDTO.getLastName());
     }
 
-    private boolean checkEmailValid(String email) {
+    public boolean checkEmailValid(String email) {
         return checkValueValid(email) && email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
     }
-    private boolean checkPasswordValid(String password) {
+    public boolean checkPasswordValid(String password) {
         return checkValueValid(password) && password.length() >= 6;
     }
 
-    private boolean checkNameValid(String name) {
+    public boolean checkNameValid(String name) {
         return checkValueValid(name) && name.length() <= 255;
     }
 
-    private boolean checkValueValid(String value) {
+    public boolean checkValueValid(String value) {
         return value != null && !value.isEmpty();
     }
 
@@ -81,8 +81,7 @@ public class UserController {
     @GetMapping(path = "/api/users", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Get all users with pagination")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Found the users"),
-            @ApiResponse(responseCode = "404", description = "Users not found")})
+            @ApiResponse(responseCode = "200", description = "Found the users")})
     public Page<ResponseUserDTO> getAllUsers(
             @Parameter(description = "Page number")
             @RequestParam(name = "page") int page,

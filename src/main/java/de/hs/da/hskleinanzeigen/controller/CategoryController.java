@@ -42,7 +42,7 @@ public class CategoryController {
     public ResponseEntity<CategoryDTO> createAdvertisement(@Parameter(description = "Category details to create a new category") @RequestBody CategoryDTO categoryDTO) {
         if (categoryDTO.getName() == null || categoryDTO.getName().isEmpty())
             throw new IllegalEntityException("CategoryPayload", "?", "Name must not be empty");
-        return categoryService.createAdvertisement(categoryMapper.toEntity(categoryDTO))
+        return categoryService.createCategory(categoryMapper.toEntity(categoryDTO))
                 .map(newCategory -> ResponseEntity.created(URI.create("/api/categories")).body(categoryMapper.toDTO(newCategory)))
                 .orElseThrow(() -> new EntityNotFoundException("Category",categoryDTO.getName()));
     }

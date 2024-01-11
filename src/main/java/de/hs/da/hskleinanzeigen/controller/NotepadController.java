@@ -41,7 +41,8 @@ public class NotepadController {
     @Operation(summary = "Create or update notepad entry")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Notepad entry created"),
-            @ApiResponse(responseCode = "400", description = "Invalid input")})
+            @ApiResponse(responseCode = "400", description = "Invalid input"),
+            @ApiResponse(responseCode = "404", description = "User or Advertisement not found")})
     public ResponseEntity<Map<String, Integer>> createNotepad(@Parameter(description = "Notepad details to create a new notepad") @PathVariable("userId") int userId, @RequestBody RequestNotepadDTO notepad) {
         notepad.setUserId(userId);
         return notepadService.createNotepad(userId, notepad.getAdvertisementId(), notepadMapper.toEntity(notepad))
@@ -54,7 +55,6 @@ public class NotepadController {
     @Operation(summary = "Get notepad by user id")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Found the notepad"),
-            @ApiResponse(responseCode = "204", description = "Notepad not found"),
             @ApiResponse(responseCode = "404", description = "User not found"),
     })
     public ResponseEntity<List<ResponseNotepadDTO>> getNotepadByUserId(@Parameter(description = "To get notepad by user id") @PathVariable int userId) {
@@ -71,7 +71,10 @@ public class NotepadController {
     @Secured({"ROLE_ADMIN", "ROLE_USER"})
     @Transactional
     @Operation(summary = "Delete notepad entry by user id and advertisement id")
-    @ApiResponse(responseCode = "204", description = "Notepad entry not found")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Deleted the notepad"),
+            @ApiResponse(responseCode = "404", description = "User or Category not found"),
+    })
     public ResponseEntity<Void> deleteEntityByUserIdAndAdvertisementId(@Parameter(description = "To delete notepad") @PathVariable int userId, @RequestParam(name = "advertisementId", required = true) int advertisementId) {
         return notepadService.deleteEntityByUserIdAndAdvertisementId(userId, advertisementId);
     }

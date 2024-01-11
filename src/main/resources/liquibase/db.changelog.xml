@@ -142,4 +142,14 @@
             <column name="next_val" valueNumeric="1"/>
         </insert>
     </changeSet>
+    <changeSet id="prevent_table_creation" author="moses">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="AD"/>
+                <tableExists tableName="CATEGORY"/>
+                <tableExists tableName="USER"/>
+                <tableExists tableName="NOTEPAD"/>
+            </not>
+        </preConditions>
+    </changeSet>
 </databaseChangeLog>

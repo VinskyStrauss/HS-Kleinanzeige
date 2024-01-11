@@ -5,7 +5,6 @@ import de.hs.da.hskleinanzeigen.entity.Notepad;
 import de.hs.da.hskleinanzeigen.entity.User;
 import de.hs.da.hskleinanzeigen.exception.EntityNotFoundException;
 import de.hs.da.hskleinanzeigen.exception.IllegalEntityException;
-import de.hs.da.hskleinanzeigen.mapper.NotepadMapper;
 import de.hs.da.hskleinanzeigen.repository.AdvertisementRepository;
 import de.hs.da.hskleinanzeigen.repository.NotepadRepository;
 import de.hs.da.hskleinanzeigen.repository.UserRepository;
@@ -13,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.*;
 
 @RestController
@@ -25,7 +23,7 @@ public class NotepadService {
 
 
     @Autowired
-    public NotepadService(AdvertisementRepository advertisementRepository, UserRepository userRepository, NotepadRepository notepadRepository, NotepadMapper notepadMapper) {
+    public NotepadService(AdvertisementRepository advertisementRepository, UserRepository userRepository, NotepadRepository notepadRepository) {
         this.advertisementRepository = advertisementRepository;
         this.userRepository = userRepository;
         this.notepadRepository = notepadRepository;
@@ -63,6 +61,8 @@ public class NotepadService {
         notepadRepository.deleteByUserAndAdvertisement(user, advertisement);
         return ResponseEntity.noContent().build();
     }
+
+
 
 
 }

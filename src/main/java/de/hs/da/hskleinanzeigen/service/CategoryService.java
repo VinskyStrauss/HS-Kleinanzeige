@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 
-import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,7 +19,7 @@ public class CategoryService {
         this.categoryRepository = categoryRepository;
     }
 
-    public Optional<Category> createAdvertisement(Category category) {
+    public Optional<Category> createCategory(Category category) {
         if(categoryRepository.findByName(category.getName()).isPresent())
             throw new EntityIntegrityViolationException("Category",category.getName());
         categoryRepository.save(category);

@@ -2,7 +2,6 @@ package de.hs.da.hskleinanzeigen.service;
 
 import de.hs.da.hskleinanzeigen.entity.User;
 import de.hs.da.hskleinanzeigen.exception.EntityNotFoundException;
-import de.hs.da.hskleinanzeigen.mapper.AdvertisementMapper;
 import de.hs.da.hskleinanzeigen.repository.AdvertisementRepository;
 import de.hs.da.hskleinanzeigen.entity.Category;
 import de.hs.da.hskleinanzeigen.repository.CategoryRepository;
@@ -14,8 +13,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import java.net.URI;
 import java.util.Optional;
 
 @RestController
@@ -25,9 +22,8 @@ public class AdvertisementService {
     private final CategoryRepository categoryRepository;
     private final UserRepository userRepository;
 
-
     @Autowired
-    public AdvertisementService(AdvertisementRepository advertisementRepository, CategoryRepository categoryRepository, UserRepository userRepository, AdvertisementMapper advertisementMapper) {
+    public AdvertisementService(AdvertisementRepository advertisementRepository, CategoryRepository categoryRepository, UserRepository userRepository) {
         this.advertisementRepository = advertisementRepository;
         this.categoryRepository = categoryRepository;
         this.userRepository = userRepository;

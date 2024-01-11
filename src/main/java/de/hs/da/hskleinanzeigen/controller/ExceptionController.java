@@ -4,7 +4,6 @@ import de.hs.da.hskleinanzeigen.exception.EntityIntegrityViolationException;
 import de.hs.da.hskleinanzeigen.exception.EntityNotFoundException;
 import de.hs.da.hskleinanzeigen.exception.IllegalEntityException;
 import de.hs.da.hskleinanzeigen.exception.NoEntityContentFoundException;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
