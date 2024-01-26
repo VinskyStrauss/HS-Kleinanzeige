@@ -109,11 +109,11 @@
             <column name="USER_ID"/>
         </createIndex>
     </changeSet>
-    <changeSet author="moses (generated)" id="1701454413150-12">
+    <!--changeSet author="moses (generated)" id="1701454413150-12">
         <createIndex indexName="USER_ID" tableName="NOTEPAD">
             <column name="USER_ID"/>
         </createIndex>
-    </changeSet>
+    </changeSet-->
     <changeSet author="moses (generated)" id="1701454413150-13">
         <addForeignKeyConstraint baseColumnNames="CATEGORY_ID" baseTableName="AD" constraintName="AD_ibfk_1" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="ID" referencedTableName="CATEGORY" validate="true"/>
     </changeSet>
@@ -142,7 +142,7 @@
             <column name="next_val" valueNumeric="1"/>
         </insert>
     </changeSet>
-    <changeSet id="prevent_table_creation" author="moses">
+    <!--changeSet id="prevent_table_creation" author="moses">
         <preConditions onFail="MARK_RAN">
             <not>
                 <tableExists tableName="AD"/>
@@ -151,5 +151,5 @@
                 <tableExists tableName="NOTEPAD"/>
             </not>
         </preConditions>
-    </changeSet>
+    </changeSet-->
 </databaseChangeLog>

@@ -13,7 +13,7 @@ import java.util.Date;
 @AllArgsConstructor
 public class Notepad {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID")
     private int id;
 
