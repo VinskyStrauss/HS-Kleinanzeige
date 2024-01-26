@@ -2,6 +2,7 @@ package de.hs.da.hskleinanzeigen;
 
 import de.hs.da.hskleinanzeigen.entity.Category;
 import de.hs.da.hskleinanzeigen.repository.CategoryRepository;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,24 +20,32 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @AutoConfigureMockMvc
 @SpringBootTest
-public class CategoryControllerTest {
+public class CategoryControllerIntegrationTest {
     @Autowired
     private MockMvc mockMvc;
 
     @Autowired
     private CategoryRepository categoryRepository;
 
+    Category category = TestUtils.createCategory("NameAA");
+
     @BeforeEach
     void setUp(){
-        Category category1 = TestUtils.createCategory("NameAA");
-        categoryRepository.save(category1);
+        category = categoryRepository.save(category);
+    }
+
+    @AfterEach
+    void tearDown(){
+        categoryRepository.delete(category);
     }
 
     @Test
     void createAdvertisementStatus201() throws Exception {
-        final String CREATE_CATEGORY_PAYLOAD = "{\n" +
-                "   \"name\":\"" + "Category" + "\"\n" +
-                "}\n";
+        final String CREATE_CATEGORY_PAYLOAD = """
+                {
+                   "name":"Category"
+                }
+                """;
 
         mockMvc.perform(post(TestUtils.BASE_PATH_CATEGORY)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -46,13 +55,17 @@ public class CategoryControllerTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").exists())
                 .andExpect(jsonPath("$.name").value("Category"));
+
+        categoryRepository.delete(categoryRepository.findByName("Category").orElseThrow());
     }
 
     @Test
     void createAdvertisementStatus400() throws Exception {
-        final String CREATE_CATEGORY_PAYLOAD_INCOMPLETE = "{\n" +
-                "   \"name\":\"" + "" + "\"\n" +
-                "}\n";
+        final String CREATE_CATEGORY_PAYLOAD_INCOMPLETE = """
+                {
+                   "name":""
+                }
+                """;
 
         mockMvc.perform(post(TestUtils.BASE_PATH_CATEGORY)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -65,9 +78,11 @@ public class CategoryControllerTest {
     @Test
     void createAdvertisementStatus409() throws Exception {
         categoryRepository.save(TestUtils.createCategory("NameAB"));
-        final String CREATE_CATEGORY_PAYLOAD_INCOMPLETE = "{\n" +
-                "   \"name\":\"" + "NameAB" + "\"\n" +
-                "}\n";
+        final String CREATE_CATEGORY_PAYLOAD_INCOMPLETE = """
+                {
+                   "name":"NameAB"
+                }
+                """;
 
         mockMvc.perform(post(TestUtils.BASE_PATH_CATEGORY)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -79,21 +94,18 @@ public class CategoryControllerTest {
 
     @Test
     void getCategoryByIdStatus200() throws Exception {
-        categoryRepository.save(TestUtils.createCategory("NameAAA"));
-        final int CATEGORY_ID = categoryRepository.findByName("NameAAA").orElseThrow().getId();
-
-        mockMvc.perform(get(TestUtils.BASE_PATH_CATEGORY + "/{id}", CATEGORY_ID)
+        mockMvc.perform(get(TestUtils.BASE_PATH_CATEGORY + "/{id}", category.getId())
                         .with(httpBasic("user", "user")))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(CATEGORY_ID))
-                .andExpect(jsonPath("$.name").value("NameAAA"));
+                .andExpect(jsonPath("$.id").value(category.getId()))
+                .andExpect(jsonPath("$.name").value("NameAA"));
     }
 
     @Test
     void getCategoryByIdStatus404() throws Exception {
-        final int CATEGORY_ID = 9;
+        final int CATEGORY_ID = 9999999;
 
-        mockMvc.perform(get(TestUtils.BASE_PATH_CATEGORY + "{id}", CATEGORY_ID)
+        mockMvc.perform(get(TestUtils.BASE_PATH_CATEGORY + "/{id}", CATEGORY_ID)
                         .with(httpBasic("user", "user")))
                 .andExpect(status().isNotFound());
     }

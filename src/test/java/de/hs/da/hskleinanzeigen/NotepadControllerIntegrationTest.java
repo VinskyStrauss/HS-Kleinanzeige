@@ -1,13 +1,11 @@
 package de.hs.da.hskleinanzeigen;
 
-import de.hs.da.hskleinanzeigen.entity.AdType;
-import de.hs.da.hskleinanzeigen.entity.Advertisement;
-import de.hs.da.hskleinanzeigen.entity.Category;
-import de.hs.da.hskleinanzeigen.entity.User;
+import de.hs.da.hskleinanzeigen.entity.*;
 import de.hs.da.hskleinanzeigen.repository.AdvertisementRepository;
 import de.hs.da.hskleinanzeigen.repository.CategoryRepository;
 import de.hs.da.hskleinanzeigen.repository.NotepadRepository;
 import de.hs.da.hskleinanzeigen.repository.UserRepository;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +23,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @AutoConfigureMockMvc
 @SpringBootTest
-public class NotepadControllerTest {
+public class NotepadControllerIntegrationTest {
     @Autowired
     private MockMvc mockMvc;
     @Autowired
@@ -37,43 +35,59 @@ public class NotepadControllerTest {
     @Autowired
     private NotepadRepository notepadRepository;
 
+    Category category = TestUtils.createCategory("NameA");
+    User user = TestUtils.createUser("somevalid@email.de","Vorname", "Nachname", "Standort", "pass123supi","06254-call-me-maybe");
+    Advertisement ad1;
+    Advertisement ad2;
+    Notepad notepad;
+
     @BeforeEach
     void setUp(){
-        Category category1 = TestUtils.createCategory("NameA");
-        User user = TestUtils.createUser("somevalid@email.de","Vorname", "Nachname", "Standort", "pass123supi","06254-call-me-maybe");
-        category1 = categoryRepository.save(category1);
+        category = categoryRepository.save(category);
         user = userRepository.save(user);
 
-        Advertisement advertisement = TestUtils.createAd(AdType.OFFER, category1, user, "Titel A", "Beschreibung", 42, "Standort");
-        advertisement = advertisementRepository.save(advertisement);
-        advertisementRepository.save(TestUtils.createAd(AdType.OFFER, category1, user, "Titel B", "Beschreibung", 42, "Standort"));
-        notepadRepository.save(TestUtils.createNotepad(user, advertisement, "Notiz"));
+        ad1 = TestUtils.createAd(AdType.OFFER, category, user, "Titel A", "Beschreibung", 42, "Standort");
+        ad1 = advertisementRepository.save(ad1);
+        ad2 = advertisementRepository.save(TestUtils.createAd(AdType.OFFER, category, user, "Titel B", "Beschreibung", 42, "Standort"));
+
+        notepad = notepadRepository.save(TestUtils.createNotepad(user, ad1, "Notiz"));
+    }
+
+    @AfterEach
+    void tearDown(){
+        notepadRepository.delete(notepad);
+        advertisementRepository.delete(ad1);
+        advertisementRepository.delete(ad2);
+        categoryRepository.delete(category);
+        userRepository.delete(user);
     }
 
     @Test
     void createNotepadStatus200_NewNotepad() throws Exception {
-        final String NOTEPAD_PAYLOAD = "{\n" +
-                "        \"advertisementId\": " + 2 + ",\n" +
-                "        \"note\": \"Zimmer direkt bei der HS\"\n" +
-                "    }\n";
+        final String NOTEPAD_PAYLOAD ="{\n" +
+                "    \"advertisementId\": " + ad2.getId() + ",\n" +
+                "    \"note\":\"Zimmer direkt bei der HS\"\n" +
+                "}";
 
-        mockMvc.perform(put(TestUtils.BASE_PATH_NOTEPAD, 1)
+        mockMvc.perform(put(TestUtils.BASE_PATH_NOTEPAD, user.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(NOTEPAD_PAYLOAD)
                         .accept(MediaType.APPLICATION_JSON)
                         .with(httpBasic("user", "user")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", notNullValue()));
+
+        notepadRepository.delete(notepadRepository.findByUserAndAdvertisement(user,ad2).orElseThrow());
     }
 
     @Test
     void createNotepadStatus200_ExistingNotepad() throws Exception{
         final String NOTEPAD_PAYLOAD_NOTE_CHANGED = "{\n" +
-                "        \"advertisementId\": " + 1 + ",\n" +
-                "        \"note\": \"Beste WG ever!\"\n" +
-                "    }\n";
+                "    \"advertisementId\": " + ad1.getId() + ",\n" +
+                "    \"note\":\"Zimmer direkt bei der HS\"\n" +
+                "}";
 
-        mockMvc.perform(put(TestUtils.BASE_PATH_NOTEPAD, 1)
+        mockMvc.perform(put(TestUtils.BASE_PATH_NOTEPAD, user.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(NOTEPAD_PAYLOAD_NOTE_CHANGED)
                         .accept(MediaType.APPLICATION_JSON)
@@ -85,9 +99,11 @@ public class NotepadControllerTest {
     @Test
     void testCreateNotepadStatus400() throws Exception {
         final int USER_ID = 100002;
-        final String NOTEPAD_PAYLOAD_INCOMPLETE = "{\n" +
-                "   \"note\":\"Zimmer direkt bei der HS\"\n" +
-                "}\n";
+        final String NOTEPAD_PAYLOAD_INCOMPLETE = """
+                {
+                   "note":"Zimmer direkt bei der HS"
+                }
+                """;
 
         mockMvc.perform(put(TestUtils.BASE_PATH_NOTEPAD, USER_ID)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -99,7 +115,7 @@ public class NotepadControllerTest {
 
     @Test
     void testGetNotepadByUserIdStatus200() throws Exception {
-        mockMvc.perform(get(TestUtils.BASE_PATH_NOTEPAD, 1)
+        mockMvc.perform(get(TestUtils.BASE_PATH_NOTEPAD, user.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
                         .with(httpBasic("user", "user")))
@@ -135,11 +151,8 @@ public class NotepadControllerTest {
 
     @Test
     void testDeleteEntityByUserIdAndAdvertisementIdStatus200() throws Exception {
-        final int USER_ID = 1;
-        final int AD_ID = 1;
-
-        mockMvc.perform(delete(TestUtils.BASE_PATH_NOTEPAD, USER_ID)
-                        .param("advertisementId", String.valueOf(AD_ID))
+        mockMvc.perform(delete(TestUtils.BASE_PATH_NOTEPAD, user.getId())
+                        .param("advertisementId", String.valueOf(ad1.getId()))
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
                         .with(httpBasic("user", "user")))
@@ -149,10 +162,9 @@ public class NotepadControllerTest {
     @Test
     void testDeleteEntityByUserIdAndAdvertisementIdStatus404() throws Exception {
         final int USER_ID = 100009;
-        final int AD_ID = 1;
 
         mockMvc.perform(delete(TestUtils.BASE_PATH_NOTEPAD, USER_ID)
-                        .param("advertisementId", String.valueOf(AD_ID))
+                        .param("advertisementId", String.valueOf(ad1.getId()))
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
                         .with(httpBasic("user", "user")))

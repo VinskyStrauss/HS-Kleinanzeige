@@ -1,11 +1,13 @@
 package de.hs.da.hskleinanzeigen;
 
 import de.hs.da.hskleinanzeigen.entity.AdType;
+import de.hs.da.hskleinanzeigen.entity.Advertisement;
 import de.hs.da.hskleinanzeigen.entity.Category;
 import de.hs.da.hskleinanzeigen.entity.User;
 import de.hs.da.hskleinanzeigen.repository.AdvertisementRepository;
 import de.hs.da.hskleinanzeigen.repository.CategoryRepository;
 import de.hs.da.hskleinanzeigen.repository.UserRepository;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +24,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @AutoConfigureMockMvc
 @SpringBootTest
-public class AdvertisementControllerTest {
+public class AdvertisementControllerIntegrationTest {
     @Autowired
     private MockMvc mockMvc;
     @Autowired
@@ -32,26 +34,38 @@ public class AdvertisementControllerTest {
     @Autowired
     private UserRepository userRepository;
 
+    Category category = TestUtils.createCategory("NameAd");
+    User user = TestUtils.createUser("somevalidad@email.de","Vorname", "Nachname", "Standort", "pass123supi","06254-call-me-maybe");
+
+    Advertisement ad1;
+    Advertisement ad2;
+
     @BeforeEach
     void setUp(){
-        Category category1 = TestUtils.createCategory("NameA");
-        User user = TestUtils.createUser("somevalid@email.de","Vorname", "Nachname", "Standort", "pass123supi","06254-call-me-maybe");
-        category1 = categoryRepository.save(category1);
+        category = categoryRepository.save(category);
         user = userRepository.save(user);
-        advertisementRepository.save(TestUtils.createAd(AdType.OFFER, category1, user, "Titel A", "Beschreibung", 42, "Standort"));
-        advertisementRepository.save(TestUtils.createAd(AdType.REQUEST, category1, user, "Titel B", "Beschreibung", 42, "Standort"));
+        ad1 = advertisementRepository.save(TestUtils.createAd(AdType.OFFER, category, user, "Titel Ad", "Beschreibung", 42, "Standort"));
+        ad2 = advertisementRepository.save(TestUtils.createAd(AdType.REQUEST, category, user, "Titel Bad", "Beschreibung", 42, "Standort"));
+    }
+
+    @AfterEach
+    void tearDown(){
+        advertisementRepository.delete(ad1);
+        advertisementRepository.delete(ad2);
+        categoryRepository.delete(category);
+        userRepository.delete(user);
     }
 
     @Test
     void createAdvertisementStatus201() throws Exception {
         final String CREATE_ADD_PAYLOAD = "{\n" +
                 "    \"type\" : \"OFFER\",\n" +
-                "    \"categoryId\": 1,\n" +
-                "    \"title\":\"Zimmer in 4er WG 2\",\n" +
+                "    \"categoryId\": " + category.getId() + ",\n" +
+                "    \"title\":\"Zimmer in 4er WG 3\",\n" +
                 "    \"description\":\"Wohnheim direkt neben der HS\",\n" +
                 "    \"price\" : 400,\n" +
                 "    \"location\":\"Birkenweg, Darmstadt\",\n" +
-                "    \"userId\" : 1\n" +
+                "    \"userId\" : " + user.getId() + "\n" +
                 "}";
 
         mockMvc.perform(post(TestUtils.BASE_PATH_AD)
@@ -62,21 +76,24 @@ public class AdvertisementControllerTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").isNotEmpty())
                 .andExpect(jsonPath("$.type").value("OFFER"))
-                .andExpect(jsonPath("$.title").value("Zimmer in 4er WG 2"))
+                .andExpect(jsonPath("$.title").value("Zimmer in 4er WG 3"))
                 .andExpect(jsonPath("$.description").value("Wohnheim direkt neben der HS"))
                 .andExpect(jsonPath("$.price").value(400));
+
+        advertisementRepository.delete(advertisementRepository.findByTitle("Zimmer in 4er WG 3").orElseThrow());
     }
 
     @Test
     void createAdvertisementStatus400() throws Exception {
-        final String CREATE_ADD_PAYLOAD_INCOMPLETE = "{\n" +
-                "    \"type\" : \"OFFER\",\n" +
-                "    \"categoryId\" : 200003,\n" +
-                "    \"title\":\"Zimmer in 4er WG\",\n" +
-                "    \"description\":\"Wohnheim direkt neben der HS\",\n" +
-                "    \"price\" : 400,\n" +
-                "    \"location\":\"Birkenweg, Darmstadt\"\n" +
-                "}";
+        final String CREATE_ADD_PAYLOAD_INCOMPLETE = """
+                {
+                    "type" : "OFFER",
+                    "categoryId" : 200003,
+                    "title":"Zimmer in 4er WG",
+                    "description":"Wohnheim direkt neben der HS",
+                    "price" : 400,
+                    "location":"Birkenweg, Darmstadt"
+                }""";
 
         mockMvc.perform(post(TestUtils.BASE_PATH_AD)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -88,15 +105,16 @@ public class AdvertisementControllerTest {
 
     @Test
     void createAdvertisementStatus404() throws Exception {
-        final String CREATE_ADD_PAYLOAD_INVALID = "{\n" +
-                "    \"type\" : \"OFFER\",\n" +
-                "    \"categoryId\": 200003,\n" +
-                "    \"title\":\"Zimmer in 4er WG\",\n" +
-                "    \"description\":\"Wohnheim direkt neben der HS\",\n" +
-                "    \"price\" : 400,\n" +
-                "    \"location\":\"Birkenweg, Darmstadt\",\n" +
-                "    \"userId\" : 100009\n" +
-                "}";
+        final String CREATE_ADD_PAYLOAD_INVALID = """
+                {
+                    "type" : "OFFER",
+                    "categoryId": 200003,
+                    "title":"Zimmer in 4er WG",
+                    "description":"Wohnheim direkt neben der HS",
+                    "price" : 400,
+                    "location":"Birkenweg, Darmstadt",
+                    "userId" : 100009
+                }""";
 
         mockMvc.perform(post(TestUtils.BASE_PATH_AD)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -108,23 +126,21 @@ public class AdvertisementControllerTest {
 
     @Test
     void getAdvertisementByIdStatus200() throws Exception {
-        final int AD_ID = 1;
-
-        mockMvc.perform(get(TestUtils.BASE_PATH_AD + "/{id}", AD_ID)
+        mockMvc.perform(get(TestUtils.BASE_PATH_AD + "/{id}", ad1.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
                         .with(httpBasic("user", "user")))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(AD_ID))
+                .andExpect(jsonPath("$.id").value(ad1.getId()))
                 .andExpect(jsonPath("$.type").value("OFFER"))
-                .andExpect(jsonPath("$.title").value("Titel A"))
+                .andExpect(jsonPath("$.title").value("Titel Ad"))
                 .andExpect(jsonPath("$.description").value("Beschreibung"))
                 .andExpect(jsonPath("$.price").value(42))
                 .andExpect(jsonPath("$.location").value("Standort"))
-                .andExpect(jsonPath("$.category.id").value(1))
-                .andExpect(jsonPath("$.category.name").value("NameA"))
-                .andExpect(jsonPath("$.user.id").value(1))
-                .andExpect(jsonPath("$.user.email").value("somevalid@email.de"))
+                .andExpect(jsonPath("$.category.id").value(category.getId()))
+                .andExpect(jsonPath("$.category.name").value("NameAd"))
+                .andExpect(jsonPath("$.user.id").value(user.getId()))
+                .andExpect(jsonPath("$.user.email").value("somevalidad@email.de"))
                 .andExpect(jsonPath("$.user.firstName").value("Vorname"))
                 .andExpect(jsonPath("$.user.lastName").value("Nachname"))
                 .andExpect(jsonPath("$.user.location").value("Standort"))
@@ -178,7 +194,7 @@ public class AdvertisementControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
                         .param("type", "REQUEST")
-                        .param("categoryId", "1")
+                        .param("categoryId", String.valueOf(category.getId()))
                         .param("priceFrom", "0")
                         .param("priceTo", "600")
                         .param("page", "0")
