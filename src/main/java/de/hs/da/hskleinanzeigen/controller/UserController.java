@@ -2,6 +2,7 @@ package de.hs.da.hskleinanzeigen.controller;
 
 import de.hs.da.hskleinanzeigen.dto.request.RequestUserDTO;
 import de.hs.da.hskleinanzeigen.dto.response.ResponseUserDTO;
+import de.hs.da.hskleinanzeigen.entity.User;
 import de.hs.da.hskleinanzeigen.exception.EntityNotFoundException;
 import de.hs.da.hskleinanzeigen.exception.IllegalEntityException;
 import de.hs.da.hskleinanzeigen.mapper.UserMapper;
@@ -12,6 +13,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.data.domain.Page;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
@@ -26,11 +28,30 @@ import java.net.URI;
 public class UserController {
     private final UserService userService;
     private final UserMapper userMapper;
+    @Autowired
+    private RedisTemplate<Integer, User> redisTemplate;
 
     @Autowired
     public UserController(UserService userService, UserMapper userMapper) {
         this.userService = userService;
         this.userMapper = userMapper;
+    }
+
+    public void saveUser(User user) {
+        User newUserInCache = new User();
+        newUserInCache.setId(user.getId());
+        newUserInCache.setEmail(user.getEmail());
+        newUserInCache.setFirstName(user.getFirstName());
+        newUserInCache.setLastName(user.getLastName());
+        newUserInCache.setLocation(user.getLocation());
+        newUserInCache.setPassword(user.getPassword());
+        newUserInCache.setPhone(user.getPassword());
+        newUserInCache.setCreated(user.getCreated());
+        redisTemplate.opsForValue().set(newUserInCache.getId(), newUserInCache);
+    }
+
+    public User findById(int id) {
+        return redisTemplate.opsForValue().get(id);
     }
 
     @PostMapping(path = "/api/users", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE )
@@ -42,9 +63,9 @@ public class UserController {
     public ResponseEntity<ResponseUserDTO> createUser(@Parameter(description = "User details to create a new user", required = true)  @RequestBody RequestUserDTO user) {
         if (!checkValueValid(user))
             throw new IllegalEntityException("User",user.getEmail());
-        return userService.createUser(userMapper.toEntity(user))
-                .map(newUser -> ResponseEntity.created(URI.create("/api/users")).body(userMapper.toResDTO(newUser)))
-                .orElseThrow(() -> new EntityNotFoundException("User",user.getEmail()));
+        User createdUser = userService.createUser(userMapper.toEntity(user)).orElseThrow(() -> new EntityNotFoundException("User",user.getEmail()));
+        saveUser(createdUser);
+        return ResponseEntity.created(URI.create("/api/users")).body(userMapper.toResDTO(createdUser));
     }
 
     public boolean checkValueValid(RequestUserDTO requestUserDTO) {
@@ -73,9 +94,15 @@ public class UserController {
             @ApiResponse(responseCode = "200", description = "Found the user"),
             @ApiResponse(responseCode = "404", description = "User not found")})
     public ResponseEntity<ResponseUserDTO> getUserById(@Parameter(description = "To get user by id") @PathVariable int id) {
-        return userService.getUserById(id)
-                .map(user -> ResponseEntity.ok().body(userMapper.toResDTO(user)))
-                .orElseThrow(() -> new EntityNotFoundException("User",id));
+        User userFromCache = findById(id);
+        if(userFromCache != null){
+            return ResponseEntity.ok().body(userMapper.toResDTO(userFromCache));
+        }
+        User searchedUser = userService.getUserById(id).orElseThrow(() -> new EntityNotFoundException("User",id));
+        if(findById(searchedUser.getId()) == null){
+            saveUser(searchedUser);
+        }
+        return ResponseEntity.ok().body(userMapper.toResDTO(searchedUser));
     }
 
     @GetMapping(path = "/api/users", produces = MediaType.APPLICATION_JSON_VALUE)
