@@ -1,6 +1,7 @@
 package de.hs.da.hskleinanzeigen;
 
 import de.hs.da.hskleinanzeigen.entity.User;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
@@ -9,6 +10,7 @@ import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSeriali
 import org.springframework.data.redis.serializer.GenericToStringSerializer;
 
 @Configuration
+@ConfigurationProperties(prefix = "spring.redis")
 public class RedisConfig {
     @Bean
     public RedisTemplate<Integer, User> redisTemplate(RedisConnectionFactory connectionFactory) {
