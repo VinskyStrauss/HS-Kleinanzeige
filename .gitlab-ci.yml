@@ -1,9 +1,7 @@
 # DinD service is required for Testcontainers
 services:
-  - name: docker:dind
-    alias: docker
-  - name: redis:latest
-    alias: redis
+  - docker:dind
+  - redis:latest
 
 variables:
   # This will suppress any download for dependencies and plugins or upload messages which would clutter the console log.
