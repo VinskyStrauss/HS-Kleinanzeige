@@ -87,7 +87,8 @@ public class GetUserRedisIntegrationTest {
                 .andExpect(jsonPath("$.email").value("somevalidredisuser@email.de"))
                 .andExpect(jsonPath("$.firstName").value("Vorname"))
                 .andExpect(jsonPath("$.lastName").value("Nachname"))
-                .andExpect(jsonPath("$.location").value("Standort"));
+                .andExpect(jsonPath("$.location").value("Standort"))
+                .andExpect(jsonPath("$.phone").value("06254-call-me-maybe"));
         verify(userRepositorySpy, times(0)).findById(user.getId());
 
     }

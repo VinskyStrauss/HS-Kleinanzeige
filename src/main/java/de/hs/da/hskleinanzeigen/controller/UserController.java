@@ -45,7 +45,7 @@ public class UserController {
         newUserInCache.setLastName(user.getLastName());
         newUserInCache.setLocation(user.getLocation());
         newUserInCache.setPassword(user.getPassword());
-        newUserInCache.setPhone(user.getPassword());
+        newUserInCache.setPhone(user.getPhone());
         newUserInCache.setCreated(user.getCreated());
         redisTemplate.opsForValue().set(newUserInCache.getId(), newUserInCache);
     }
