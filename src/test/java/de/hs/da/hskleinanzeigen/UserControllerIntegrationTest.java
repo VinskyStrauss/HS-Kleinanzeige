@@ -54,6 +54,7 @@ public class UserControllerIntegrationTest {
 
     @BeforeEach
     void setUp(){
+        REDIS_CONTAINER.start();
         user = userRepository.save(user);
     }
 
