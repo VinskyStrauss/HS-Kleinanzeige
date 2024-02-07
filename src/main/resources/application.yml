@@ -23,10 +23,13 @@ spring:
       ddl-auto: none
       naming:
         physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
-  data:
+  cache:
+    type: redis
     redis:
       host: localhost
       port: 6379
+      time-to-live: 600000
+
 
 management:
   endpoints:
