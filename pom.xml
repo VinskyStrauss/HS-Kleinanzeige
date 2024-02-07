@@ -24,6 +24,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <mapstruct.version>1.5.5.Final</mapstruct.version>
         <java.version>17</java.version>
+        <testcontainers.version>1.19.3</testcontainers.version>
     </properties>
 
     <dependencyManagement>
@@ -149,6 +150,7 @@
             <version>1.4.6</version>
             <scope>test</scope>
         </dependency>
+
     </dependencies>
 
     <build>
