@@ -19,6 +19,7 @@ import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.cache.CacheManager;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
@@ -31,12 +32,14 @@ public class UserControllerTest {
     private UserService userService;
     @Mock
     private UserMapper userMapper;
+    @Mock
+    private CacheManager cacheManager;
 
     @BeforeEach
     public void setUp() {
         userService = mock(UserService.class);
         userMapper = mock(UserMapper.class);
-        userController = new UserController(userService, userMapper);
+        userController = new UserController(userService, userMapper,cacheManager);
     }
 
     @Test

@@ -32,14 +32,13 @@ import java.util.Objects;
 public class UserController {
     private final UserService userService;
     private final UserMapper userMapper;
+    private final CacheManager cacheManager;
 
     @Autowired
-    private CacheManager cacheManager;
-
-    @Autowired
-    public UserController(UserService userService, UserMapper userMapper) {
+    public UserController(UserService userService, UserMapper userMapper, CacheManager cacheManager) {
         this.userService = userService;
         this.userMapper = userMapper;
+        this.cacheManager = cacheManager;
     }
 
     @PostMapping(path = "/api/users", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
