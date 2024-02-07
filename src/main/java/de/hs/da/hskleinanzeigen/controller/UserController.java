@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
@@ -82,8 +83,9 @@ public class UserController {
             @ApiResponse(responseCode = "200", description = "Found the user"),
             @ApiResponse(responseCode = "404", description = "User not found")})
     public ResponseEntity<ResponseUserDTO> getUserById(@Parameter(description = "To get user by id") @PathVariable int id) {
-        ResponseUserDTO userFromCache = (ResponseUserDTO) cacheManager.getCache("user").get(id);
-        if(userFromCache != null){
+        Cache.ValueWrapper userWrapper = cacheManager.getCache("user").get(id);
+        if (userWrapper != null) {
+            ResponseUserDTO userFromCache = (ResponseUserDTO) userWrapper.get();
             return ResponseEntity.ok().body(userFromCache);
         }
         ResponseUserDTO searchedUser = userMapper.toResDTO(userService.getUserById(id).orElseThrow(() -> new EntityNotFoundException("User",id)));

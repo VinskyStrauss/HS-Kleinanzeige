@@ -1,5 +1,7 @@
 package de.hs.da.hskleinanzeigen;
 
+import com.redis.testcontainers.RedisContainer;
+import de.hs.da.hskleinanzeigen.dto.response.ResponseUserDTO;
 import de.hs.da.hskleinanzeigen.entity.User;
 import de.hs.da.hskleinanzeigen.repository.UserRepository;
 import org.junit.jupiter.api.AfterEach;
@@ -9,13 +11,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cache.CacheManager;
+import org.springframework.cache.support.SimpleValueWrapper;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultMatcher;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.utility.DockerImageName;
 
+import java.util.Objects;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -31,20 +42,29 @@ public class UserControllerIntegrationTest {
     @Autowired
     private UserRepository userRepository;
     @Container
-    private static final GenericContainer<?> redisContainer = new GenericContainer<>("redis:latest")
-            .withExposedPorts(6379);
+    private static final RedisContainer REDIS_CONTAINER =
+            new RedisContainer(DockerImageName.parse("redis:7.0.12")).withExposedPorts(6379);
+    @DynamicPropertySource
+    private static void registerRedisProperties(DynamicPropertyRegistry registry) {
+        registry.add("spring.redis.host", REDIS_CONTAINER::getHost);
+        registry.add("spring.redis.port", () -> REDIS_CONTAINER.getMappedPort(6379).toString());
+    }
 
     User user = TestUtils.createUser("somevaliduser@email.de","Vorname", "Nachname", "Standort", "pass123supi","06254-call-me-maybe");
 
     @BeforeEach
     void setUp(){
-        redisContainer.start();
         user = userRepository.save(user);
     }
 
     @AfterEach
     void tearDown(){
         userRepository.delete(user);
+    }
+
+    @Test
+    void checkRedisContainerRunning() {
+        assertTrue(REDIS_CONTAINER.isRunning());
     }
 
     @Test
@@ -61,6 +81,7 @@ public class UserControllerIntegrationTest {
 
         mockMvc.perform(post(TestUtils.BASE_PATH_USER)
                         .contentType(MediaType.APPLICATION_JSON)
+                        .content(CREATE_USER_PAYLOAD)
                         .content(CREATE_USER_PAYLOAD)
                         .accept(MediaType.APPLICATION_JSON)
                         .with(httpBasic("user", "user")))
