@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.support.SimpleValueWrapper;
 import org.springframework.http.MediaType;
@@ -26,7 +27,7 @@ import java.util.Objects;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.*;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -41,6 +42,8 @@ public class UserControllerIntegrationTest {
     private MockMvc mockMvc;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private CacheManager cacheManager;
     @Container
     private static final RedisContainer REDIS_CONTAINER =
             new RedisContainer(DockerImageName.parse("redis:7.0.12")).withExposedPorts(6379);
@@ -60,7 +63,14 @@ public class UserControllerIntegrationTest {
 
     @AfterEach
     void tearDown(){
+        getCache().clear();
         userRepository.delete(user);
+    }
+
+    private Cache getCache(){
+        Cache userCache = cacheManager.getCache("user");
+        assertNotNull(userCache);
+        return userCache;
     }
 
     @Test
@@ -93,6 +103,16 @@ public class UserControllerIntegrationTest {
                 .andExpect(jsonPath("$.lastName").value("Müller"))
                 .andExpect(jsonPath("$.location").value("Darmstadt"))
                 .andExpect(jsonPath("$.phone").value("069-123456"));
+
+        Cache.ValueWrapper wrapperCache = getCache().get(userRepository.findByEmail("valid@email.com").orElseThrow().getId());
+        assertNotNull(wrapperCache);
+        ResponseUserDTO responseFromCache = (ResponseUserDTO) wrapperCache.get();
+        assertNotNull(responseFromCache);
+        assertEquals(responseFromCache.getEmail(),"valid@email.com");
+        assertEquals(responseFromCache.getFirstName(),"Thomas");
+        assertEquals(responseFromCache.getLastName(),"Müller");
+        assertEquals(responseFromCache.getLocation(),"Darmstadt");
+        assertEquals(responseFromCache.getPhone(),"069-123456");
 
         userRepository.delete(userRepository.findByEmail("valid@email.com").orElseThrow());
     }
@@ -190,6 +210,16 @@ public class UserControllerIntegrationTest {
                 .andExpect(jsonPath("$.lastName").value("Nachname"))
                 .andExpect(jsonPath("$.location").value("Standort"))
                 .andExpect(jsonPath("$.phone").value("06254-call-me-maybe"));
+
+        Cache.ValueWrapper wrapperCache = getCache().get(user.getId());
+        assertNotNull(wrapperCache);
+        ResponseUserDTO responseFromCache = (ResponseUserDTO) wrapperCache.get();
+        assertNotNull(responseFromCache);
+        assertEquals(responseFromCache.getEmail(),"somevaliduser@email.de");
+        assertEquals(responseFromCache.getFirstName(),"Vorname");
+        assertEquals(responseFromCache.getLastName(),"Nachname");
+        assertEquals(responseFromCache.getLocation(),"Standort");
+        assertEquals(responseFromCache.getPhone(),"06254-call-me-maybe");
     }
 
     @Test
