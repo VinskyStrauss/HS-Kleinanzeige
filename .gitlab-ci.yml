@@ -1,7 +1,6 @@
 # DinD service is required for Testcontainers
 services:
   - docker:dind
-  - redis:latest
 
 variables:
   # This will suppress any download for dependencies and plugins or upload messages which would clutter the console log.
@@ -14,9 +13,6 @@ variables:
   DOCKER_TLS_CERTDIR: ""
   # Improve performance with overlayfs.
   DOCKER_DRIVER: overlay2
-  REDIS_PORT: "6379"
-  REDIS_HOST: "redis"
-  REDIS_URL: "redis://redis:6379"
 
 image: maven:3.9.3-eclipse-temurin-17-alpine
 
