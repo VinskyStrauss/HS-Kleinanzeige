@@ -44,20 +44,19 @@ public class UserControllerIntegrationTest {
     private UserRepository userRepository;
     @Autowired
     private CacheManager cacheManager;
-    @Container
-    private static final RedisContainer REDIS_CONTAINER =
-            new RedisContainer(DockerImageName.parse("redis:7.0.12")).withExposedPorts(6379);
-    @DynamicPropertySource
-    private static void registerRedisProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.redis.host", REDIS_CONTAINER::getHost);
-        registry.add("spring.redis.port", () -> REDIS_CONTAINER.getMappedPort(6379).toString());
+
+    static {
+        GenericContainer<?> redis =
+                new GenericContainer<>(DockerImageName.parse("redis:7.0.12")).withExposedPorts(6379);
+        redis.start();
+        System.setProperty("spring.redis.host", redis.getHost());
+        System.setProperty("spring.redis.port", redis.getMappedPort(6379).toString());
     }
 
     User user = TestUtils.createUser("somevaliduser@email.de","Vorname", "Nachname", "Standort", "pass123supi","06254-call-me-maybe");
 
     @BeforeEach
     void setUp(){
-        REDIS_CONTAINER.start();
         user = userRepository.save(user);
     }
 
@@ -71,11 +70,6 @@ public class UserControllerIntegrationTest {
         Cache userCache = cacheManager.getCache("user");
         assertNotNull(userCache);
         return userCache;
-    }
-
-    @Test
-    void checkRedisContainerRunning() {
-        assertTrue(REDIS_CONTAINER.isRunning());
     }
 
     @Test
