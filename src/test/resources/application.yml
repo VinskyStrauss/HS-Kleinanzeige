@@ -8,3 +8,10 @@ spring:
   liquibase:
     enabled: true
     change-log: classpath:/liquibase/db.changelog.xml
+
+  cache:
+    type: redis
+    redis:
+      host: ${spring.redis.host}
+      port: ${spring.redis.port}
+      time-to-live: 600000
